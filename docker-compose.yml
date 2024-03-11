@@ -1,0 +1,175 @@
+services:
+
+  master:
+    image: hadoop-master
+    hostname: master
+    ports:
+      - "4040:4040"
+      - "8020:8020"
+      - "8080:8080"
+      - "8088:8088"
+      - "9870:9870"
+      - "10000:10000"
+    volumes:
+      - namenode:/opt/hadoop/dfs/name
+    restart: always
+    networks:
+      hadoopnet:
+        ipv4_address: 172.28.1.2
+    extra_hosts:
+      - "worker1:172.28.1.3"
+      - "worker2:172.28.1.4"
+      - "worker3:172.28.1.5"
+      - "worker4:172.28.1.6"
+      - "history:172.28.1.7"
+      - "jupyter:172.28.1.8"
+
+  worker1:
+    image: hadoop-worker
+    hostname: worker1
+    depends_on:
+      - master
+    ports:
+      - "8042:8042"
+      - "8081:8081"
+      - "9864:9864"
+    volumes:
+      - datanode1:/opt/hadoop/dfs/data
+    restart: always
+    networks:
+      hadoopnet:
+        ipv4_address: 172.28.1.3
+    extra_hosts:
+      - "master:172.28.1.2"
+      - "worker2:172.28.1.4"
+      - "worker3:172.28.1.5"
+      - "worker4:172.28.1.6"
+      - "history:172.28.1.7"
+      - "jupyter:172.28.1.8"
+
+  worker2:
+    image: hadoop-worker
+    hostname: worker2
+    depends_on:
+      - master
+    ports:
+      - "8043:8042"
+      - "8082:8081"
+      - "9865:9864"
+    volumes:
+      - datanode2:/opt/hadoop/dfs/data
+    restart: always
+    networks:
+      hadoopnet:
+        ipv4_address: 172.28.1.4
+    extra_hosts:
+      - "master:172.28.1.2"
+      - "worker1:172.28.1.3"
+      - "worker3:172.28.1.5"
+      - "worker4:172.28.1.6"
+      - "history:172.28.1.7"
+      - "jupyter:172.28.1.8"
+
+  worker3:
+    image: hadoop-worker
+    hostname: worker3
+    depends_on:
+      - master
+    ports:
+      - "8044:8042"
+      - "8083:8081"
+      - "9866:9864"
+    volumes:
+      - datanode3:/opt/hadoop/dfs/data
+    restart: always
+    networks:
+      hadoopnet:
+        ipv4_address: 172.28.1.5
+    extra_hosts:
+      - "master:172.28.1.2"
+      - "worker1:172.28.1.3"
+      - "worker2:172.28.1.4"
+      - "worker4:172.28.1.6"
+      - "history:172.28.1.7"
+      - "jupyter:172.28.1.8"
+
+  worker4:
+    image: hadoop-worker
+    hostname: worker4
+    depends_on:
+      - master
+    ports:
+      - "8045:8042"
+      - "8084:8081"
+      - "9867:9864"
+    volumes:
+      - datanode4:/opt/hadoop/dfs/data
+    restart: always
+    networks:
+      hadoopnet:
+        ipv4_address: 172.28.1.6
+    extra_hosts:
+      - "master:172.28.1.2"
+      - "worker1:172.28.1.3"
+      - "worker2:172.28.1.4"
+      - "worker3:172.28.1.5"
+      - "history:172.28.1.7"
+      - "jupyter:172.28.1.8"
+
+  history:
+    image: hadoop-history
+    hostname: history
+    depends_on:
+      - master
+      - worker1
+      - worker2
+    ports:
+      - "19888:19888"
+    restart: always
+    networks:
+      hadoopnet:
+        ipv4_address: 172.28.1.7
+    extra_hosts:
+      - "master:172.28.1.2"
+      - "worker1:172.28.1.3"
+      - "worker2:172.28.1.4"
+      - "worker3:172.28.1.5"
+      - "worker4:172.28.1.6"
+      - "jupyter:172.28.1.8"
+
+  jupyter:
+    image: hadoop-jupyter:latest
+    hostname: jupyter
+    depends_on:
+      - master
+      - worker1
+      - worker2
+    ports:
+        - "8888:8888"
+    volumes:
+        - ./jupyter/notebook:/home/jupyter
+    networks:
+      hadoopnet:
+        ipv4_address: 172.28.1.8
+    extra_hosts:
+      - "master:172.28.1.2"
+      - "worker1:172.28.1.3"
+      - "worker2:172.28.1.4"
+      - "worker3:172.28.1.5"
+      - "worker4:172.28.1.6"
+      - "history:172.28.1.7"
+
+
+volumes:
+  namenode:
+  datanode1:
+  datanode2:
+  datanode3:
+  datanode4:
+
+networks:
+  hadoopnet:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
