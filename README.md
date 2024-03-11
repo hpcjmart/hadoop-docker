@@ -22,13 +22,19 @@ NameNode: http://localhost:9870
 HistoryServer: http://localhost:19888
 
 Datanode1: http://localhost:9864
+
 Datanode2: http://localhost:9865
+
 Datanode3: http://localhost:9866
+
 Datanode4: http://localhost:9867
 
 NodeManager1: http://localhost:8042
+
 NodeManager2: http://localhost:8043
+
 NodeManager3: http://localhost:8044
+
 NodeManager4: http://localhost:8045
 
 ### Jupyter Notebook
